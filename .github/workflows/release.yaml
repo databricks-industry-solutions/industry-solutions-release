@@ -68,6 +68,8 @@ jobs:
 
       - name: Deploy solution to github page
         run: |
+          git config --global user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
+          git config --global user.name "$(gh api /users/${GITHUB_ACTOR} | jq .name -r)"
           git add .
           git commit -a -m "Adding solution [${{ github.event.inputs.solution_name }}]"
           git subtree push --prefix dist/ origin gh-pages
