@@ -33,7 +33,7 @@ if not args.name:
 output_dir = f'site/{args.name}'
 if os.path.exists(output_dir):
     shutil.rmtree(output_dir)
-os.mkdir(output_dir)
+os.makedirs(output_dir)
 
 accelerator = Accelerator(
     db_host=os.environ['DB_HOST'],
