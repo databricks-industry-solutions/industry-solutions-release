@@ -14,12 +14,8 @@ def run_cmd(cmd):
 
 
 # fetch the most recent version tag to use as build version
-try:
-    latest_tag = run_cmd('git tag --sort=taggerdate | tail -1')
-except:
-    latest_tag = 'v0.0.1'
+latest_tag = run_cmd('git tag -l | tail -1')
 
-print(latest_tag)
 # set by maven and following semantic versioning style version: https://semver.org
 # we only keep MAJOR.MINOR.PATCH
 m = re.search('.*(\d+\.\d+\.\d+).*', latest_tag, re.IGNORECASE)
