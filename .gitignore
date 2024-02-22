@@ -1,0 +1,9 @@
+**/**/*.pyc
+**/**/*pycache*
+/*venv
+.vscode/
+.idea/
+dist
+config
+.DS_Store
+config.yaml
