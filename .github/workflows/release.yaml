@@ -71,16 +71,3 @@ jobs:
           git add .
           git commit -a -m "Adding solution [${{ github.event.inputs.solution_name }}]"
           git subtree push --prefix dist/ origin gh-pages
-      
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: 'dist'
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-        with:
-          artifact_name: ${{ github.event.inputs.solution_name }}
