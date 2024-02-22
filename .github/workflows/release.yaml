@@ -2,8 +2,17 @@ name: Solution Accelerator Build
 env:
   DB_TOKEN: ${{ secrets.DB_TOKEN }}
 
-on: workflow_dispatch
-
+on:
+  workflow_dispatch:
+    inputs:
+      repository_path:
+        description: 'Repository path on E2 field eng'
+        required: true
+        default: '/Workspace/Repos/antoine.amend@databricks.com/esg-scoring'
+      industry_vertical:
+        description: 'Industry vertical, can be [fsi, cme, rcg, hls, mnf, cyb]'
+        required: true
+        default: 'fsi'
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -38,6 +47,6 @@ jobs:
       - name: Install dependencies
         run: pip install -U -r requirements.txt
 
-        # Here comes the crux of our python development. See core logic in our setup.py file
-      - name: Build python dist
-        run: python databricks.py --vertical fsi --path /Workspace/Repos/antoine.amend@databricks.com/esg-scoring
+        # Package and publish solution
+      - name: Publish solution accelerator
+        run: python databricks.py --vertical ${{ github.event.inputs.industry_vertical }} --path ${{ github.event.inputs.repository_path }}
