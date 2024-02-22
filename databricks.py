@@ -50,11 +50,11 @@ accelerator = Accelerator(
     db_host='e2-demo-west.cloud.databricks.com',
     db_token=os.environ['DB_TOKEN'],
     deploy=False,
-    aws_s3_bucket=None,
-    aws_s3_path=None,
-    aws_s3_link=None,
-    aws_access_key_id=None,
-    aws_secret_access_key=None
+    aws_s3_bucket='databricks-web-files',
+    aws_s3_path='notebooks/{vertical}/{solution_codename}/{file_name}',
+    aws_s3_link='https://databricks-web-files.s3.us-east-2.amazonaws.com/notebooks',
+    aws_access_key_id=os.environ['AWS_ACCESS_KEY'],
+    aws_secret_access_key=os.environ['AWS_ACCESS_SECRET']
 )
 
 accelerator.release(

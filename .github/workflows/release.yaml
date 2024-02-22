@@ -1,6 +1,8 @@
 name: Solution Accelerator Build
 env:
   DB_TOKEN: ${{ secrets.DB_TOKEN }}
+  AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+  AWS_ACCESS_SECRET: ${{ secrets. AWS_ACCESS_SECRET }}
 
 on:
   workflow_dispatch:
@@ -13,6 +15,7 @@ on:
         description: 'Industry vertical, can be [fsi, cme, rcg, hls, mnf, cyb]'
         required: true
         default: 'fsi'
+
 jobs:
   release:
     runs-on: ubuntu-latest

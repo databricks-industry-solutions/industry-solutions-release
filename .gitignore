@@ -6,5 +6,4 @@
 dist
 config
 .DS_Store
-config.yaml
 *.egg-info
