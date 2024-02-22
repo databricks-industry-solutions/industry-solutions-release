@@ -34,8 +34,7 @@ jobs:
 
         # And install any dependency required for unit testing
       - name: Install dependencies
-        working-directory: ./python
-        run: pip install -U -r requirements.txt wheel semver==3.0.2 wheel==0.42.0
+        run: pip install -U -r requirements.txt semver==3.0.2 wheel==0.42.0
 
         # Here comes the crux of our python development. See core logic in our setup.py file
       - name: Build python dist
