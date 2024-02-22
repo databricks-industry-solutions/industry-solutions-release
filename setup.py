@@ -19,6 +19,7 @@ try:
 except:
     latest_tag = 'v0.0.1'
 
+print(latest_tag)
 # set by maven and following semantic versioning style version: https://semver.org
 # we only keep MAJOR.MINOR.PATCH
 m = re.search('.*(\d+\.\d+\.\d+).*', latest_tag, re.IGNORECASE)
