@@ -66,6 +66,12 @@ jobs:
       - name: Publish solution accelerator
         run: python databricks.py --path ${{ github.event.inputs.repository_path }} --name ${{ github.event.inputs.solution_name }}
 
+      - name: Deploy frontend to Heroku
+        run: |
+          git add .
+          git commit -a -m "Adding solution [${{ github.event.inputs.solution_name }}]"
+          git subtree push --prefix dist/ origin gh-pages
+      
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
