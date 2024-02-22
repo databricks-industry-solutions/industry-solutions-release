@@ -38,5 +38,4 @@ jobs:
 
         # Here comes the crux of our python development. See core logic in our setup.py file
       - name: Build python dist
-        working-directory: ./python
         run: python setup.py clean bdist_wheel
