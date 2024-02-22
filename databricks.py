@@ -22,15 +22,11 @@ parser.add_argument("-v", "--vertical", help="industry vertical [fsi, rcpg, cme,
 
 args = parser.parse_args()
 
-if not args.name:
-    print("please provide a code name for solution accelerator")
-    sys.exit(1)
-
 if not args.path:
     print("please provide a databricks path to download solution from")
     sys.exit(1)
 
-if not args.solution:
+if not args.name:
     print("please provide a code name for this solution accelerator")
     sys.exit(1)
 
