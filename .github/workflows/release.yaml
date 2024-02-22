@@ -82,4 +82,4 @@ jobs:
         run: |
           git add .
           git commit -a -m "Adding solution [${{ github.event.inputs.solution_name }}]"
-          git subtree push -f --prefix site/ origin gh-pages
+          git subtree push --prefix site/ origin gh-pages
