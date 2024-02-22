@@ -4,6 +4,7 @@ env:
   DB_HOST: ${{ secrets.DB_HOST }}
   AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
   AWS_ACCESS_SECRET: ${{ secrets. AWS_ACCESS_SECRET }}
+  GH_TOKEN: ${{ github.token }}
 
 on:
   workflow_dispatch:
