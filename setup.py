@@ -15,17 +15,18 @@ def run_cmd(cmd):
 
 # fetch the most recent version tag to use as build version
 latest_tag = run_cmd('git tag -l | tail -1')
+print(latest_tag)
 
 # set by maven and following semantic versioning style version: https://semver.org
 # we only keep MAJOR.MINOR.PATCH
-m = re.search('.*(\d+\.\d+\.\d+).*', latest_tag, re.IGNORECASE)
+m = re.search('.*(\d+\.\d+\.\d+)', latest_tag, re.IGNORECASE)
 if m:
     build_version = m.group(1)
     # validate that this is a valid semantic version - will throw exception if not
     semver.VersionInfo.parse(build_version)
-    print("Building version [{}]".format(build_version))
+    print(f"Building version [{build_version}]")
 else:
-    raise "Could not extract version from tag {}".format(latest_tag)
+    raise Exception(f"Could not extract version from tag {latest_tag}")
 
 # use the contents of the README file as the 'long description' for the package
 with open('../README.md', 'r') as fh:
