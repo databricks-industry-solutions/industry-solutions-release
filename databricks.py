@@ -38,12 +38,12 @@ os.mkdir(output_dir)
 accelerator = Accelerator(
     db_host=os.environ['DB_HOST'],
     db_token=os.environ['DB_TOKEN'],
-    deploy=False,
-    aws_s3_bucket='databricks-web-files',
-    aws_s3_path='notebooks/{solution_codename}/{file_name}',
-    aws_s3_link='https://databricks-web-files.s3.us-east-2.amazonaws.com/notebooks',
-    aws_access_key_id=os.environ['AWS_ACCESS_KEY'],
-    aws_secret_access_key=os.environ['AWS_ACCESS_SECRET']
+    deploy=False
+    # aws_s3_bucket='databricks-web-files',
+    # aws_s3_path='notebooks/{solution_codename}/{file_name}',
+    # aws_s3_link='https://databricks-web-files.s3.us-east-2.amazonaws.com/notebooks',
+    # aws_access_key_id=os.environ['AWS_ACCESS_KEY'],
+    # aws_secret_access_key=os.environ['AWS_ACCESS_SECRET']
 )
 
 accelerator.release(

@@ -24,7 +24,7 @@ def create_readme_page(solution_name, local_dir, content):
         with open('content/template_readme.html', 'r') as file_in:
             html_text = str(file_in.read())
             notebook_html = html_text.replace('[README_CONTENT]', json_b64)
-            with open(f'{local_dir}/README.html', "w") as file_out:
+            with open(f'{local_dir}/{solution_name}.html', "w") as file_out:
                 file_out.write(notebook_html)
 
 
@@ -50,7 +50,7 @@ def create_index_page(solution_name, local_dir, index_href):
             with open(output_file, "w") as file_out:
                 html_text = str(file_in.read())
                 html_text = enrich_html(html_text)
-                html_text = html_text.replace('[NOTEBOOK_HTML_LINK]', 'readme.html')
+                html_text = html_text.replace('[NOTEBOOK_HTML_LINK]', f'{solution_name}.html')
                 html_text = html_text.replace('[NOTEBOOK_CONTENT]', json_b64)
                 html_text = html_text.replace('[SOLUTION_NAME]', solution_name)
                 file_out.write(html_text)
@@ -239,7 +239,7 @@ class Accelerator:
                 readme_content = self.db.workspace.export_workspace(o['path'])
                 create_readme_page(solution_name, local_dir, readme_content)
                 readme_file = True
-                index.append(create_index('readme.html', 'README'))
+                index.append(create_index(f'{solution_name}.html', 'Context'))
                 break
         if not readme_file:
             raise Exception('Could not find [README.md] file')
