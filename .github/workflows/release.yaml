@@ -1,4 +1,4 @@
-name: Solution Accelerator Build
+name: ${{ github.event.inputs.solution_name }}
 env:
   DB_TOKEN: ${{ secrets.DB_TOKEN }}
   DB_HOST: ${{ secrets.DB_HOST }}
@@ -71,6 +71,7 @@ jobs:
         run: |
           git config --global user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
           git config --global user.name "$(gh api /users/${GITHUB_ACTOR} | jq .name -r)"
+          git pull
           git add .
           git commit -a -m "Adding solution [${{ github.event.inputs.solution_name }}]"
           git subtree push --prefix site/ origin gh-pages
