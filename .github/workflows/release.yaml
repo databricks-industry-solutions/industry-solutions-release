@@ -45,7 +45,7 @@ jobs:
 
       - name: Retrieve latest site
         run: |
-          git checkout gh-pages
+          git checkout origin/gh-pages
           git pull
           git checkout main
 
