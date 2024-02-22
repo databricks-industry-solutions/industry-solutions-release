@@ -34,6 +34,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
+      - name: Configure git
+        run: |
+          git config --global user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
+          git config --global user.name "$(gh api /users/${GITHUB_ACTOR} | jq .name -r)"
+
+      - name: Retrieve latest site
+        run: |
+          git checkout gh-pages
+          git pull
+          git checkout main
+
       # The first step is obviously to check out the repository
       - name: Checkout project
         uses: actions/checkout@v2
@@ -69,8 +80,6 @@ jobs:
 
       - name: Deploy solution to github page
         run: |
-          git config --global user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
-          git config --global user.name "$(gh api /users/${GITHUB_ACTOR} | jq .name -r)"
           git add .
           git commit -a -m "Adding solution [${{ github.event.inputs.solution_name }}]"
           git subtree push -f --prefix site/ origin gh-pages
