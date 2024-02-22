@@ -34,6 +34,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
+      # The first step is obviously to check out the repository
+      - name: Checkout project
+        uses: actions/checkout@v2
+
       - name: Configure git
         run: |
           git config --global user.email "${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
@@ -44,10 +48,6 @@ jobs:
           git checkout gh-pages
           git pull
           git checkout main
-
-      # The first step is obviously to check out the repository
-      - name: Checkout project
-        uses: actions/checkout@v2
 
       # We test and package our code against python 3.9 distribution
       - name: Set up Python
