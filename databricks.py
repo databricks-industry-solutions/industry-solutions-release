@@ -22,14 +22,17 @@ parser.add_argument("-v", "--vertical", help="industry vertical [fsi, rcpg, cme,
 
 args = parser.parse_args()
 
+if not args.name:
+    print("please provide a code name for solution accelerator")
+    sys.exit(1)
+
 if not args.path:
     print("please provide a databricks path to download solution from")
     sys.exit(1)
 
-if not args.name:
-    solution_name = args.path.split('/')[-1]
-else:
-    solution_name = args.name
+if not args.solution:
+    print("please provide a code name for this solution accelerator")
+    sys.exit(1)
 
 if args.deploy:
     if not args.vertical:
@@ -41,10 +44,10 @@ if args.deploy:
             print("please provide a valid industry vertical, {}".format(industries))
             sys.exit(1)
 
-output_dir = 'dist'
+output_dir = f'dist/{args.name}'
 if os.path.exists(output_dir):
     shutil.rmtree(output_dir)
-os.mkdir(output_dir)
+os.makedirs(output_dir)
 
 accelerator = Accelerator(
     db_host='e2-demo-west.cloud.databricks.com',
@@ -59,7 +62,7 @@ accelerator = Accelerator(
 
 accelerator.release(
     db_path=args.path,
-    db_name=solution_name,
+    db_name=args.name,
     industry_vertical=args.vertical.lower(),
     output_dir=output_dir
 )

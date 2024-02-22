@@ -15,6 +15,21 @@ on:
         description: 'Industry vertical, can be [fsi, cme, rcg, hls, mnf, cyb]'
         required: true
         default: 'fsi'
+      solution_name:
+        description: 'Code name of the solution'
+        required: true
+        default: 'esg_scoring'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   release:
@@ -52,4 +67,15 @@ jobs:
 
         # Package and publish solution
       - name: Publish solution accelerator
-        run: python databricks.py --vertical ${{ github.event.inputs.industry_vertical }} --path ${{ github.event.inputs.repository_path }}
+        run: python databricks.py --vertical ${{ github.event.inputs.industry_vertical }} --path ${{ github.event.inputs.repository_path }} --name ${{ github.event.inputs.solution_name }}
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'dist/${{ github.event.inputs.solution_name }}'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
