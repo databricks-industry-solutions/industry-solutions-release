@@ -1,4 +1,4 @@
-name: Geoscan Python Release
+name: Solution Accelerator Build
 
 on:
   push:
