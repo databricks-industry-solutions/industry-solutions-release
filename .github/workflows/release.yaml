@@ -1,6 +1,7 @@
 name: Solution Accelerator Build
 env:
   DB_TOKEN: ${{ secrets.DB_TOKEN }}
+  DB_HOST: ${{ secrets.DB_HOST }}
   AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
   AWS_ACCESS_SECRET: ${{ secrets. AWS_ACCESS_SECRET }}
 
@@ -11,10 +12,6 @@ on:
         description: 'Repository path on E2 field eng'
         required: true
         default: '/Workspace/Repos/antoine.amend@databricks.com/esg-scoring'
-      industry_vertical:
-        description: 'Industry vertical, can be [fsi, cme, rcg, hls, mnf, cyb]'
-        required: true
-        default: 'fsi'
       solution_name:
         description: 'Code name of the solution'
         required: true
@@ -67,7 +64,7 @@ jobs:
 
         # Package and publish solution
       - name: Publish solution accelerator
-        run: python databricks.py --vertical ${{ github.event.inputs.industry_vertical }} --path ${{ github.event.inputs.repository_path }} --name ${{ github.event.inputs.solution_name }}
+        run: python databricks.py --path ${{ github.event.inputs.repository_path }} --name ${{ github.event.inputs.solution_name }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -75,7 +72,9 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'dist/${{ github.event.inputs.solution_name }}'
+          path: 'dist'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: ${{ github.event.inputs.solution_name }}

@@ -40,13 +40,13 @@ if args.deploy:
             print("please provide a valid industry vertical, {}".format(industries))
             sys.exit(1)
 
-output_dir = f'dist/{args.name}'
+output_dir = 'dist'
 if os.path.exists(output_dir):
     shutil.rmtree(output_dir)
-os.makedirs(output_dir)
+os.mkdir(output_dir)
 
 accelerator = Accelerator(
-    db_host='e2-demo-west.cloud.databricks.com',
+    db_host=os.environ['DB_HOST'],
     db_token=os.environ['DB_TOKEN'],
     deploy=False,
     aws_s3_bucket='databricks-web-files',
