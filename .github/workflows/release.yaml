@@ -45,9 +45,9 @@ jobs:
 
       - name: Retrieve latest site
         run: |
-          git checkout origin/gh-pages
-          git pull
-          git checkout main
+          git subtree split --prefix site/ -b gh-pages
+          git push -f origin gh-pages:gh-pages
+          git branch -D gh-pages
 
       # We test and package our code against python 3.9 distribution
       - name: Set up Python
