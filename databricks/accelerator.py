@@ -268,12 +268,11 @@ class Accelerator:
         self.logger.info("Create Index page")
         create_index_page(solution_name, local_dir, index)
 
-    def deploy_s3(self, files, solution_codename, vertical):
+    def deploy_s3(self, files, solution_codename):
         for file in files:
             file_name = os.path.basename(file)
             remote_file = self.s3_path.format(
                 solution_codename=solution_codename,
-                vertical=vertical,
                 file_name=file_name
             )
             self.logger.info(f"Publishing [{file_name}] to s3")
@@ -286,14 +285,13 @@ class Accelerator:
                     ContentType='text/html'
                 )
 
-    def release(self, db_path, db_name, industry_vertical, output_dir):
+    def release(self, db_path, db_name, output_dir):
         self.logger.info(f"Releasing solution [{db_name}]")
         self.export_to_html(db_path, output_dir, db_name)
         if self.deploy:
             files = os.listdir(output_dir)
-            self.deploy_s3([f"{db_path}/{file}" for file in files], db_name, industry_vertical)
-            self.logger.info("Solution deployed to [{link}/{vertical}/{solution_codename}/index.html]".format(
+            self.deploy_s3([f"{db_path}/{file}" for file in files], db_name)
+            self.logger.info("Solution deployed to [{link}/{solution_codename}/index.html]".format(
                 link=self.s3_link,
-                vertical=industry_vertical,
                 solution_codename=db_name)
             )

@@ -30,16 +30,6 @@ if not args.name:
     print("please provide a code name for this solution accelerator")
     sys.exit(1)
 
-if args.deploy:
-    if not args.vertical:
-        print("please provide an industry vertical")
-        sys.exit(1)
-    else:
-        industries = ['fsi', 'rcg', 'cme', 'hls', 'mnf']
-        if args.vertical not in industries:
-            print("please provide a valid industry vertical, {}".format(industries))
-            sys.exit(1)
-
 output_dir = 'dist'
 if os.path.exists(output_dir):
     shutil.rmtree(output_dir)
@@ -50,7 +40,7 @@ accelerator = Accelerator(
     db_token=os.environ['DB_TOKEN'],
     deploy=False,
     aws_s3_bucket='databricks-web-files',
-    aws_s3_path='notebooks/{vertical}/{solution_codename}/{file_name}',
+    aws_s3_path='notebooks/{solution_codename}/{file_name}',
     aws_s3_link='https://databricks-web-files.s3.us-east-2.amazonaws.com/notebooks',
     aws_access_key_id=os.environ['AWS_ACCESS_KEY'],
     aws_secret_access_key=os.environ['AWS_ACCESS_SECRET']
@@ -59,6 +49,5 @@ accelerator = Accelerator(
 accelerator.release(
     db_path=args.path,
     db_name=args.name,
-    industry_vertical=args.vertical.lower(),
     output_dir=output_dir
 )
