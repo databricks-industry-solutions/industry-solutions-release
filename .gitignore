@@ -3,7 +3,5 @@
 /*venv
 .vscode/
 .idea/
-dist
-config
 .DS_Store
 *.egg-info
