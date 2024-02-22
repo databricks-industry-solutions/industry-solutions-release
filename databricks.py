@@ -30,7 +30,7 @@ if not args.name:
     print("please provide a code name for this solution accelerator")
     sys.exit(1)
 
-output_dir = 'dist'
+output_dir = f'dist/{args.name}'
 if os.path.exists(output_dir):
     shutil.rmtree(output_dir)
 os.mkdir(output_dir)
