@@ -1,4 +1,4 @@
-name: ${{ github.event.inputs.solution_name }}
+name: deploy-solution-sites
 env:
   DB_TOKEN: ${{ secrets.DB_TOKEN }}
   DB_HOST: ${{ secrets.DB_HOST }}
