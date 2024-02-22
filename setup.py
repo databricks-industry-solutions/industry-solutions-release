@@ -12,8 +12,12 @@ def run_cmd(cmd):
                       f"STDERR: {cmd_proc.stderr.decode('utf-8')}")
     return cmd_proc.stdout.decode('utf-8').strip()
 
+
 # fetch the most recent version tag to use as build version
-latest_tag = run_cmd('git describe --abbrev=0 --tags')
+try:
+    latest_tag = run_cmd('git tag --sort=taggerdate | tail -1')
+except:
+    latest_tag = 'v0.0.1'
 
 # set by maven and following semantic versioning style version: https://semver.org
 # we only keep MAJOR.MINOR.PATCH
