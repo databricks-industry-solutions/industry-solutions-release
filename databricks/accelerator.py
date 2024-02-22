@@ -276,7 +276,7 @@ class Accelerator:
                 vertical=vertical,
                 file_name=file_name
             )
-            self.logger.info("Publishing [{file_name}] to s3".format(file_name=file_name))
+            self.logger.info(f"Publishing [{file_name}] to s3")
             with open(file, 'r') as f:
                 data = f.read()
                 self.s3.put_object(
@@ -286,15 +286,14 @@ class Accelerator:
                     ContentType='text/html'
                 )
 
-    def release(self, db_path, industry_vertical, output_dir):
-        solution_codename = db_path.split('/')[-1].lower()
-        self.logger.info("Releasing solution [{}]".format(solution_codename))
-        self.export_to_html(db_path, output_dir, solution_codename)
+    def release(self, db_path, db_name, industry_vertical, output_dir):
+        self.logger.info(f"Releasing solution [{db_name}]")
+        self.export_to_html(db_path, output_dir, db_name)
         if self.deploy:
             files = os.listdir(output_dir)
-            self.deploy_s3(["{}/{}".format(output_dir, file) for file in files], solution_codename, industry_vertical)
+            self.deploy_s3([f"{db_path}/{file}" for file in files], db_name, industry_vertical)
             self.logger.info("Solution deployed to [{link}/{vertical}/{solution_codename}/index.html]".format(
                 link=self.s3_link,
                 vertical=industry_vertical,
-                solution_codename=solution_codename)
+                solution_codename=db_name)
             )

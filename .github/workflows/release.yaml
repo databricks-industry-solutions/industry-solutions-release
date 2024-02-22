@@ -1,4 +1,6 @@
 name: Solution Accelerator Build
+env:
+  DB_TOKEN: ${{ secrets.DB_TOKEN }}
 
 on: workflow_dispatch
 
@@ -34,8 +36,8 @@ jobs:
 
         # And install any dependency required for unit testing
       - name: Install dependencies
-        run: pip install -U -r requirements.txt semver==3.0.2 wheel==0.42.0
+        run: pip install -U -r requirements.txt
 
         # Here comes the crux of our python development. See core logic in our setup.py file
       - name: Build python dist
-        run: python setup.py clean bdist_wheel
+        run: python databricks.py --vertical fsi --path /Workspace/Repos/antoine.amend@databricks.com/esg-scoring
