@@ -1,2 +1,1 @@
 databricks-api==0.9.0
-boto3==1.34.47
