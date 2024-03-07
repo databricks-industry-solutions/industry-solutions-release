@@ -6,6 +6,7 @@ from urllib.parse import quote, unquote
 import json
 import re
 import os
+from importlib import resources
 
 head_section = re.compile("%md[\n\\s]*# (.*)\n?")
 part_section = re.compile("%md[\n\\s]*## (.*)\n?")
@@ -13,21 +14,25 @@ notebook_regex = re.compile(
     "DATABRICKS_NOTEBOOK_MODEL = '((?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?)'")
 
 
+def get_resource(module: str, name: str) -> str:
+    """Load a textual resource file."""
+    with resources.open_text(module, name, encoding="utf-8") as f:
+        return f.read()
+
+
 def create_readme_page(solution_name, content):
     content_markdown = base64.b64decode(content['content']).decode('UTF-8')
     content_markdown = f'%md {content_markdown}'
-    with open("content/template_readme.json", 'r') as f_in:
-        json_object = json.loads(f_in.read())
-        json_object['name'] = f'{solution_name} / README'
-        json_object['commands'][0]['command'] = content_markdown
-        return encode_json_to_notebook(json_object)
+    json_object = json.loads(get_resource('databricks.resources', 'template_readme.json'))
+    json_object['name'] = f'{solution_name} / README'
+    json_object['commands'][0]['command'] = content_markdown
+    return encode_json_to_notebook(json_object)
 
 
 def persist_readme_page(solution_name, local_dir, content):
 
-    with open('content/template_readme.html', 'r') as file_in:
-        html_text = str(file_in.read())
-        notebook_html = html_text.replace('[DATABRICKS_NOTEBOOK_MODEL]', content)
+    html_text = get_resource('databricks.resources', 'template_readme.html')
+    notebook_html = html_text.replace('[DATABRICKS_NOTEBOOK_MODEL]', content)
 
     with open(f'{local_dir}/{solution_name}.html', "w") as file_out:
         file_out.write(notebook_html)
@@ -35,29 +40,27 @@ def persist_readme_page(solution_name, local_dir, content):
 
 def create_index_page(solution_name, index_href):
 
-    with open("content/template_index.json", 'r') as f_in:
-        json_object = json.loads(f_in.read())
-        json_object['name'] = solution_name
+    json_object = json.loads(get_resource('databricks.resources', 'template_index.json'))
+    json_object['name'] = solution_name
 
-        cmd = '%md '
-        for notebook_href in index_href:
-            cmd = '{}\n\n{}'.format(cmd, notebook_href)
+    cmd = '%md '
+    for notebook_href in index_href:
+        cmd = '{}\n\n{}'.format(cmd, notebook_href)
 
-        json_object['commands'][0]['command'] = cmd
-        json_str = json.dumps(json_object)
-        json_str = quote(json_str).encode('utf-8')
-        return base64.b64encode(json_str).decode('UTF-8')
+    json_object['commands'][0]['command'] = cmd
+    json_str = json.dumps(json_object)
+    json_str = quote(json_str).encode('utf-8')
+    return base64.b64encode(json_str).decode('UTF-8')
 
 
 def persist_index_page(solution_name, local_dir, index_notebook, landing_page):
 
-    with open('content/template_index.html', 'r') as f:
-        output_file = '{}/index.html'.format(local_dir)
-        html_text = str(f.read())
-        html_text = html_text.replace('[NOTEBOOK_HTML_LINK]', landing_page)
-        html_text = html_text.replace('[NOTEBOOK_CONTENT]', index_notebook)
-        html_text = html_text.replace('[SOLUTION_NAME]', solution_name)
-        html_text = enrich_html(html_text)
+    output_file = '{}/index.html'.format(local_dir)
+    html_text = get_resource('databricks.resources', 'template_index.html')
+    html_text = html_text.replace('[NOTEBOOK_HTML_LINK]', landing_page)
+    html_text = html_text.replace('[NOTEBOOK_CONTENT]', index_notebook)
+    html_text = html_text.replace('[SOLUTION_NAME]', solution_name)
+    html_text = enrich_html(html_text)
 
     with open(output_file, "w") as f:
         f.write(html_text)
@@ -132,7 +135,7 @@ def extract_content(html_content):
     if matches:
         return matches[0]
     else:
-        raise Exception("Could not extract notebook content from HTML")
+        raise Exception("Could not extract notebook resources from HTML")
 
 
 def transform_html(org_html, notebook_encoded):
@@ -153,15 +156,12 @@ def valid_file(o):
 
 
 def enrich_html(html_content):
-    with open("content/tag_header.html", "r") as f:
-        t = f.read()
-        html_content = html_content.replace('<head>', '<head>\n{}'.format(t))
-    with open("content/tag_body.html", "r") as f:
-        t = f.read()
-        html_content = html_content.replace('<body>', '<body>\n{}'.format(t))
-    with open("content/tag_body_end.html", "r") as f:
-        t = f.read()
-        html_content = html_content.replace('</body>', '{}\n</body>'.format(t))
+    t = get_resource('databricks.resources', 'tag_header.html')
+    html_content = html_content.replace('<head>', '<head>\n{}'.format(t))
+    t = get_resource('databricks.resources', 'tag_body.html')
+    html_content = html_content.replace('<body>', '<body>\n{}'.format(t))
+    t = get_resource('databricks.resources', 'tag_body_end.html')
+    html_content = html_content.replace('</body>', '{}\n</body>'.format(t))
     return html_content
 
 
