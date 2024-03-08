@@ -70,7 +70,7 @@ jobs:
       - name: Install dependencies
         run: pip install -U -r requirements.txt
 
-      - name: Configure databricks environment
+      - name: Publish solution accelerator
         run: |
           export DB_HOST=${{ github.event.inputs.environment }}
           case ${DB_HOST} in
@@ -88,9 +88,7 @@ jobs:
               exit 1
               ;;
           esac
-
-      - name: Publish solution accelerator
-        run: python databricks.py --path ${{ github.event.inputs.path }} --name ${{ github.event.inputs.name }}
+          python databricks.py --path ${{ github.event.inputs.path }} --name ${{ github.event.inputs.name }}
 
       - name: Deploy solution to github page
         run: |
