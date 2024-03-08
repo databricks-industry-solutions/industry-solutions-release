@@ -1,4 +1,3 @@
-import shutil
 from databricks.accelerator import Accelerator
 import os
 import logging
@@ -20,12 +19,31 @@ parser.add_argument("-n", "--name", help="databricks solution code name, default
 
 args = parser.parse_args()
 
-accelerator = Accelerator(
-    db_host=os.environ['DB_HOST'],
-    db_token=os.environ['DB_TOKEN']
-)
+
+'''
+    name: databricks-web-files
+    path: notebooks/{vertical}/{solution_codename}/{file_name}
+    link: https://databricks-web-files.s3.us-east-2.amazonaws.com/notebooks
+    '''
+
+
+s3_bucket = 'databricks-web-files'
+s3_path = 'notebooks/{solution_codename}/{file_name}'
+s3_link = 'https://databricks-web-files.s3.us-east-2.amazonaws.com/notebooks'
+s3_access_key = os.environ['AWS_ACCESS_KEY']
+s3_secret_key = os.environ['AWS_ACCESS_SECRET']
+
+db_host = os.environ['DB_HOST']
+db_token = os.environ['DB_TOKEN']
+
+
+
+accelerator = Accelerator()
 
 accelerator.release(
     db_path=args.path,
     db_name=args.name
 )
+
+s3_host = os.environ['AWS_ACCESS_KEY']
+s3_key = os.environ['AWS_ACCESS_SECRET']

@@ -1,5 +1,6 @@
 from databricks_api import DatabricksAPI
 import shutil
+import boto3
 import logging
 import base64
 from urllib.parse import quote, unquote
@@ -189,9 +190,23 @@ class Section:
 
 class Accelerator:
 
-    def __init__(self, db_host, db_token):
+    def __init__(self):
+
+        self.s3_bucket = 'databricks-web-files'
+        self.s3_path = 'notebooks/{solution_codename}/{file_name}'
+        self.s3_link = 'https://databricks-web-files.s3.us-east-2.amazonaws.com/notebooks'
+        self.db = DatabricksAPI(
+            host=os.environ['DB_HOST'],
+            token=os.environ['DB_TOKEN']
+        )
+
+        self.s3 = boto3.resource(
+            's3',
+            aws_access_key_id=os.environ['AWS_ACCESS_KEY'],
+            aws_secret_access_key=os.environ['AWS_ACCESS_SECRET']
+        ).Bucket(self.s3_bucket)
+
         self.logger = logging.getLogger('databricks')
-        self.db = DatabricksAPI(host=db_host, token=db_token)
 
     def export_to_html(self, remote_path, local_dir, solution_name):
 
@@ -244,10 +259,31 @@ class Accelerator:
         index_notebook = create_index_page(solution_name, index_html)
         persist_index_page(solution_name, local_dir, index_notebook, landing_page)
 
-    def release(self, db_path, db_name):
+    def deploy_s3(self, files, solution_codename):
+        for file in files:
+            file_name = os.path.basename(file)
+            remote_file = self.s3_path.format(
+                solution_codename=solution_codename,
+                file_name=file_name
+            )
+            self.logger.info(f"Publishing [{file_name}] to s3")
+            with open(file, 'r') as f:
+                data = f.read()
+                self.s3.put_object(
+                    Key=remote_file,
+                    Body=data,
+                    ACL='public-read',
+                    ContentType='text/html'
+                )
+
+    def release(self, db_path, db_name, deploy: False):
         output_dir = 'site'
         if os.path.exists(output_dir):
             shutil.rmtree(output_dir)
         os.makedirs(output_dir)
         self.logger.info(f"Releasing solution [{db_name}]")
         self.export_to_html(db_path, output_dir, db_name)
+        if deploy:
+            files = os.listdir(output_dir)
+            self.deploy_s3(["{}/{}".format(output_dir, file) for file in files], db_name)
+            self.logger.info(f"Solution deployed to [{self.s3_link}/{db_name}/index.html]")

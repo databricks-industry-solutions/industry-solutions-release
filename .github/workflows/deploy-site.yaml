@@ -1,5 +1,9 @@
 name: deploy-solution-sites
 
+env:
+  AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+  AWS_ACCESS_SECRET: ${{ secrets.AWS_ACCESS_SECRET }}
+
 on:
   workflow_dispatch:
     inputs:
@@ -89,10 +93,3 @@ jobs:
               ;;
           esac
           python databricks.py --path ${{ github.event.inputs.path }} --name ${{ github.event.inputs.name }}
-
-      - name: Deploy solution to github page
-        run: |
-          git add .
-          git commit -a -m "Adding solution [${{ github.event.inputs.name }}]" --reset-author
-          git push
-          git subtree push --prefix site/ origin gh-pages
