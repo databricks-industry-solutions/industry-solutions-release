@@ -93,6 +93,6 @@ jobs:
       - name: Deploy solution to github page
         run: |
           git add .
-          git commit -a -m "Adding solution [${{ github.event.inputs.name }}]"
+          git commit -a -m "Adding solution [${{ github.event.inputs.name }}]" --reset-author
           git push
           git subtree push --prefix site/ origin gh-pages
