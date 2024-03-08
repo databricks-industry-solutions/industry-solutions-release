@@ -1,17 +1,22 @@
 name: deploy-solution-sites
-env:
-  DB_TOKEN: ${{ secrets.DB_TOKEN }}
-  DB_HOST: ${{ secrets.DB_HOST }}
-  GH_TOKEN: ${{ github.token }}
 
 on:
   workflow_dispatch:
     inputs:
-      repository_path:
-        description: 'Repository path on [$DB_HOST] environment'
+      name:
+        type: string
+        description: 'Code name of the solution accelerator to deploy'
         required: true
-      solution_name:
-        description: 'Code name of the solution accelerator'
+      environment:
+        type: choice
+        description: 'Databricks environment to publish HTML from'
+        options:
+          - https://e2-demo-field-eng.cloud.databricks.com
+          - https://e2-demo-west.cloud.databricks.com
+          - https://6177827686947384.4.gcp.databricks.com
+      path:
+        type: string
+        description: 'Repository path on databricks environment'
         required: true
 
 permissions:
@@ -65,12 +70,31 @@ jobs:
       - name: Install dependencies
         run: pip install -U -r requirements.txt
 
+      - name: Configure databricks environment
+        run: |
+          export DB_HOST=${{ github.event.inputs.environment }}
+          case ${DB_HOST} in
+            "https://e2-demo-field-eng.cloud.databricks.com")
+              export DB_TOKEN=${{ secrets.DB_AWS_FIELD_TOKEN }}
+              ;;
+            "https://e2-demo-west.cloud.databricks.com")
+              export DB_TOKEN=${{ secrets.DB_AWS_DEMO_TOKEN }}
+              ;;
+            "https://6177827686947384.4.gcp.databricks.com")
+              export DB_TOKEN=${{ secrets.DB_GCP_TOKEN }}
+              ;;
+            *) 
+              echo "Unsupported environment"
+              exit 1
+              ;;
+          esac
+
       - name: Publish solution accelerator
-        run: python databricks.py --path ${{ github.event.inputs.repository_path }} --name ${{ github.event.inputs.solution_name }}
+        run: python databricks.py --path ${{ github.event.inputs.path }} --name ${{ github.event.inputs.name }}
 
       - name: Deploy solution to github page
         run: |
           git add .
-          git commit -a -m "Adding solution [${{ github.event.inputs.solution_name }}]"
+          git commit -a -m "Adding solution [${{ github.event.inputs.name }}]"
           git push
           git subtree push --prefix site/ origin gh-pages
