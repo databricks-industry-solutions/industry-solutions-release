@@ -1,13 +1,14 @@
 from databricks_api import DatabricksAPI
 import shutil
-import boto3
-import logging
 import base64
 from urllib.parse import quote, unquote
 import json
 import re
 import os
 from importlib import resources
+import logging
+import sys
+
 
 head_section = re.compile("%md[\n\\s]*# (.*)\n?")
 part_section = re.compile("%md[\n\\s]*## (.*)\n?")
@@ -190,28 +191,26 @@ class Section:
 
 class Accelerator:
 
-    def __init__(self):
+    def __init__(self, db_host, db_token, db_path, db_name):
 
-        self.s3_bucket = 'databricks-web-files'
-        self.s3_path = 'notebooks/{solution_codename}/{file_name}'
-        self.s3_link = 'https://databricks-web-files.s3.us-east-2.amazonaws.com/notebooks'
-        self.db = DatabricksAPI(
-            host=os.environ['DB_HOST'],
-            token=os.environ['DB_TOKEN']
-        )
+        root = logging.getLogger()
+        root.setLevel(logging.INFO)
 
-        self.s3 = boto3.resource(
-            's3',
-            aws_access_key_id=os.environ['AWS_ACCESS_KEY'],
-            aws_secret_access_key=os.environ['AWS_ACCESS_SECRET']
-        ).Bucket(self.s3_bucket)
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setLevel(logging.INFO)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+        root.addHandler(handler)
 
+        self.db_path = db_path
+        self.db_name = db_name
+        self.db = DatabricksAPI(host=db_host, token=db_token)
         self.logger = logging.getLogger('databricks')
 
-    def export_to_html(self, remote_path, local_dir, solution_name):
+    def export_to_html(self, local_dir):
 
         self.logger.info("Exporting solution accelerator to HTML file(s)")
-        db_objects = self.db.workspace.list(remote_path)['objects']
+        db_objects = self.db.workspace.list(self.db_path)['objects']
         db_notebooks = [db_object['path'] for db_object in db_objects if valid_file(db_object)]
         index_html = []
         landing_page = None
@@ -226,9 +225,9 @@ class Accelerator:
             if db_object['object_type'] == 'FILE' and db_object['path'].split('/')[-1] == 'README.md':
                 readme_file = True
                 readme_content = self.db.workspace.export_workspace(db_object['path'])
-                readme_notebook = create_readme_page(solution_name, readme_content)
-                persist_readme_page(solution_name, local_dir, readme_notebook)
-                landing_page = f'{solution_name}.html'
+                readme_notebook = create_readme_page(self.db_name, readme_content)
+                persist_readme_page(self.db_name, local_dir, readme_notebook)
+                landing_page = f'{self.db_name}.html'
                 index_html.append(create_index_html_element(landing_page, 'Context'))
                 break
         if not readme_file:
@@ -238,7 +237,7 @@ class Accelerator:
 
             html_content = self.db.workspace.export_workspace(file, format='HTML')
             html_text = base64.b64decode(html_content['content']).decode('utf-8')
-            notebook_name = '{} / {}'.format(solution_name, file.split('/')[-1])
+            notebook_name = '{} / {}'.format(self.db_name, file.split('/')[-1])
 
             self.logger.info("Processing notebook {} [{}]".format(i + 1, file.split('/')[-1]))
             notebook = extract_content(html_text)
@@ -246,7 +245,7 @@ class Accelerator:
             for child in children:
                 if child.section_id > section_id:
                     section_id = child.section_id
-                child_name = child.html_name(solution_name)
+                child_name = child.html_name(self.db_name)
                 with open("{}/{}".format(local_dir, child_name), 'w') as f_out:
                     child_html = transform_html(html_text, child.notebook_encoded)
                     f_out.write(child_html)
@@ -256,33 +255,13 @@ class Accelerator:
                         landing_page = child_name
 
         self.logger.info("Create Index page")
-        index_notebook = create_index_page(solution_name, index_html)
-        persist_index_page(solution_name, local_dir, index_notebook, landing_page)
+        index_notebook = create_index_page(self.db_name, index_html)
+        persist_index_page(self.db_name, local_dir, index_notebook, landing_page)
 
-    def deploy_s3(self, files, solution_codename):
-        for file in files:
-            file_name = os.path.basename(file)
-            remote_file = self.s3_path.format(
-                solution_codename=solution_codename,
-                file_name=file_name
-            )
-            self.logger.info(f"Publishing [{file_name}] to s3")
-            with open(file, 'r') as f:
-                data = f.read()
-                self.s3.put_object(
-                    Key=remote_file,
-                    Body=data,
-                    ACL='public-read',
-                    ContentType='text/html'
-                )
-
-    def release(self, db_path, db_name):
+    def release(self):
         output_dir = 'site'
         if os.path.exists(output_dir):
             shutil.rmtree(output_dir)
         os.makedirs(output_dir)
-        self.logger.info(f"Releasing solution [{db_name}]")
-        self.export_to_html(db_path, output_dir, db_name)
-        files = os.listdir(output_dir)
-        self.deploy_s3(["{}/{}".format(output_dir, file) for file in files], db_name)
-        self.logger.info(f"Solution deployed to [{self.s3_link}/{db_name}/index.html]")
+        self.logger.info(f"Releasing solution [{self.db_name}]")
+        self.export_to_html(output_dir)
