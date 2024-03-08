@@ -276,14 +276,13 @@ class Accelerator:
                     ContentType='text/html'
                 )
 
-    def release(self, db_path, db_name, deploy: False):
+    def release(self, db_path, db_name):
         output_dir = 'site'
         if os.path.exists(output_dir):
             shutil.rmtree(output_dir)
         os.makedirs(output_dir)
         self.logger.info(f"Releasing solution [{db_name}]")
         self.export_to_html(db_path, output_dir, db_name)
-        if deploy:
-            files = os.listdir(output_dir)
-            self.deploy_s3(["{}/{}".format(output_dir, file) for file in files], db_name)
-            self.logger.info(f"Solution deployed to [{self.s3_link}/{db_name}/index.html]")
+        files = os.listdir(output_dir)
+        self.deploy_s3(["{}/{}".format(output_dir, file) for file in files], db_name)
+        self.logger.info(f"Solution deployed to [{self.s3_link}/{db_name}/index.html]")
