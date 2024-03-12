@@ -191,7 +191,7 @@ class Section:
 
 class Accelerator:
 
-    def __init__(self, db_host, db_token, db_path, db_name):
+    def __init__(self, db_host, db_token, db_path, db_name, markdown=False):
 
         root = logging.getLogger()
         root.setLevel(logging.INFO)
@@ -202,6 +202,7 @@ class Accelerator:
         handler.setFormatter(formatter)
         root.addHandler(handler)
 
+        self.markdown = markdown
         self.db_path = db_path
         self.db_name = db_name
         self.db = DatabricksAPI(host=db_host, token=db_token)
@@ -237,22 +238,31 @@ class Accelerator:
 
             html_content = self.db.workspace.export_workspace(file, format='HTML')
             html_text = base64.b64decode(html_content['content']).decode('utf-8')
-            notebook_name = '{} / {}'.format(self.db_name, file.split('/')[-1])
 
             self.logger.info("Processing notebook {} [{}]".format(i + 1, file.split('/')[-1]))
-            notebook = extract_content(html_text)
-            children = process_notebook_content(section_id, notebook, notebook_name)
-            for child in children:
-                if child.section_id > section_id:
-                    section_id = child.section_id
-                child_name = child.html_name(self.db_name)
-                with open("{}/{}".format(local_dir, child_name), 'w') as f_out:
-                    child_html = transform_html(html_text, child.notebook_encoded)
-                    f_out.write(child_html)
-                    child_title = "{} {}".format(child.get_number(), child.notebook_name)
-                    index_html.append(create_index_html_element(child_name, child_title))
-                    if not landing_page:
-                        landing_page = child_name
+
+            if self.markdown:
+                notebook_name = '{} / {}'.format(self.db_name, file.split('/')[-1])
+                notebook = extract_content(html_text)
+                children = process_notebook_content(section_id, notebook, notebook_name)
+                for child in children:
+                    if child.section_id > section_id:
+                        section_id = child.section_id
+                    child_name = child.html_name(self.db_name)
+                    with open("{}/{}".format(local_dir, child_name), 'w') as f_out:
+                        child_html = transform_html(html_text, child.notebook_encoded)
+                        f_out.write(child_html)
+                        child_title = "{} {}".format(child.get_number(), child.notebook_name)
+                        index_html.append(create_index_html_element(child_name, child_title))
+                        if not landing_page:
+                            landing_page = child_name
+            else:
+                notebook_name = "{}_{}.html".format(self.db_name, i + 1)
+                if not landing_page:
+                    landing_page = notebook_name
+                with open("{}/{}".format(local_dir, notebook_name), 'w') as f_out:
+                    f_out.write(html_text)
+                    index_html.append(create_index_html_element(notebook_name, file.split('/')[-1]))
 
         self.logger.info("Create Index page")
         index_notebook = create_index_page(self.db_name, index_html)
