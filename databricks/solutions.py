@@ -268,6 +268,10 @@ class Accelerator:
         index_notebook = create_index_page(self.db_name, index_html)
         persist_index_page(self.db_name, local_dir, index_notebook, landing_page)
 
+        self.logger.info("Adding lead collector")
+        with open("{}/{}".format(local_dir, 'lead-collector.js'), 'w') as f_out:
+            f_out.write(get_resource('databricks.resources', 'lead-collector.js'))
+
     def release(self):
         output_dir = 'site'
         if os.path.exists(output_dir):
