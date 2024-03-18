@@ -59,10 +59,10 @@ def persist_index_page(solution_name, local_dir, index_notebook, landing_page):
 
     output_file = '{}/index.html'.format(local_dir)
     html_text = get_resource('databricks.resources', 'template_index.html')
+    html_text = enrich_html(html_text)
     html_text = html_text.replace('[NOTEBOOK_HTML_LINK]', landing_page)
     html_text = html_text.replace('[NOTEBOOK_CONTENT]', index_notebook)
     html_text = html_text.replace('[SOLUTION_NAME]', solution_name)
-    html_text = enrich_html(html_text)
 
     with open(output_file, "w") as f:
         f.write(html_text)
