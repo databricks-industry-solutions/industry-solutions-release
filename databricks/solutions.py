@@ -149,11 +149,14 @@ def transform_html(org_html, notebook_encoded):
     return notebook_encoded
 
 
+def is_notebook(o):
+    return o['object_type'] == "NOTEBOOK"
+
+
 def valid_file(o):
-    if o['object_type'] == "NOTEBOOK":
+    if is_notebook(o):
         if re.compile("^\\d+").match(os.path.basename(o['path'])):
-            if not os.path.basename(o['path']).startswith('00'):
-                return True
+            return True
     return False
 
 
@@ -212,7 +215,17 @@ class Accelerator:
 
         self.logger.info("Exporting solution accelerator to HTML file(s)")
         db_objects = self.db.workspace.list(self.db_path)['objects']
+
+        # Retrieve list of numbered notebooks. Those will be our core story telling assets
         db_notebooks = [db_object['path'] for db_object in db_objects if valid_file(db_object)]
+
+        # Append list of numbered notebooks (story telling) with whatever additional util notebooks
+        # Those would be added to the end of the index in alphabetical order
+        for db_object in db_objects:
+            db_path = db_object['path']
+            if is_notebook(db_object) and db_path not in db_notebooks:
+                db_notebooks.append(db_path)
+
         index_html = []
         landing_page = None
         section_id = 0
