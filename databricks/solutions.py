@@ -210,7 +210,7 @@ class Accelerator:
         self.db_path = db_path
         self.db_name = db_name
         self.db = DatabricksAPI(host=db_host, token=db_token)
-        self.w = WorkspaceClient()
+        self.w = WorkspaceClient(host=db_host, token=db_token)
         self.logger = logging.getLogger('databricks')
 
     def export_to_html(self, local_dir):
