@@ -224,7 +224,7 @@ class Accelerator:
         # Those would be added to the end of the index in alphabetical order
         for db_object in db_objects:
             db_path = db_object.path
-            print("db_object:" + str(type(db_object))
+            print("db_object:" + str(type(db_object)))
             if is_notebook(db_object) and db_path not in db_notebooks:
                 db_notebooks.append(db_path)
 
