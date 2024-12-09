@@ -154,7 +154,7 @@ def is_notebook(o):
 
 
 def valid_file(o):
-    print("o:" + str(type(o))
+    print("o:" + str(type(o)))
     if is_notebook(o):
         if re.compile("^\\d+").match(os.path.basename(o.path)):
             return True
