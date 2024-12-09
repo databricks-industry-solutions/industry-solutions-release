@@ -154,6 +154,7 @@ def is_notebook(o):
 
 
 def valid_file(o):
+    print("o:"str(type(o))
     if is_notebook(o):
         if re.compile("^\\d+").match(os.path.basename(o.path)):
             return True
@@ -223,6 +224,7 @@ class Accelerator:
         # Those would be added to the end of the index in alphabetical order
         for db_object in db_objects:
             db_path = db_object.path
+            print("db_object:"str(type(db_object))
             if is_notebook(db_object) and db_path not in db_notebooks:
                 db_notebooks.append(db_path)
 
