@@ -150,7 +150,7 @@ def transform_html(org_html, notebook_encoded):
 
 
 def is_notebook(o):
-    return return str(o.object_type) ==  'ObjectType.NOTEBOOK'
+    return str(o.object_type) ==  'ObjectType.NOTEBOOK'
 
 
 def valid_file(o):
