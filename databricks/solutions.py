@@ -216,9 +216,11 @@ class Accelerator:
 
         self.logger.info("Exporting solution accelerator to HTML file(s)")     
         db_objects = list(self.db.workspace.list(self.db_path))
-        print("db_objects[0]:" + str(type(db_objects[0])))
+        print("db_objects:" + list(self.db.workspace.list(self.db_path)))
+        
         # Retrieve list of numbered notebooks. Those will be our core story telling assets
         db_notebooks = [[x.path for x in db_objects] for db_object in db_objects if valid_file(db_object)][0]
+        
         print("db_notebooks[0]:" + str(type(db_notebooks[0])))
         # Append list of numbered notebooks (story telling) with whatever additional util notebooks
         # Those would be added to the end of the index in alphabetical order
