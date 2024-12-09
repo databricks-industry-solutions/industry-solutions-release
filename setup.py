@@ -9,6 +9,7 @@ setup(
     include_package_data=True,
     install_requires=[
         'databricks-api==0.9.0',
+        'databricks-sdk',
     ],
     long_description_content_type='text/markdown',
     url='https://github.com/databricks-industry-solutions/industry-solutions-release',
