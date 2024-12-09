@@ -150,12 +150,12 @@ def transform_html(org_html, notebook_encoded):
 
 
 def is_notebook(o):
-    return o.object_type == "NOTEBOOK"
+    return return str(o.object_type) ==  'ObjectType.NOTEBOOK'
 
 
 def valid_file(o):
     if is_notebook(o):
-        if re.compile("^\\d+").match(os.path.basename(o['path'])):
+        if re.compile("^\\d+").match(os.path.basename(o.path)):
             return True
     return False
 
