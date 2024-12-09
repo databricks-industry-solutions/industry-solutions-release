@@ -216,7 +216,7 @@ class Accelerator:
 
         self.logger.info("Exporting solution accelerator to HTML file(s)")     
         db_objects = list(self.db.workspace.list(self.db_path))
-        print("db_objects:" + list(self.db.workspace.list(self.db_path)))
+        print("db_objects:" + "\n".join(list(self.db.workspace.list(self.db_path))))
         
         # Retrieve list of numbered notebooks. Those will be our core story telling assets
         db_notebooks = [[x.path for x in db_objects] for db_object in db_objects if valid_file(db_object)][0]
