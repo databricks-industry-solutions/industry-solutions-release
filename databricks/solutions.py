@@ -1,4 +1,5 @@
 from databricks_api import DatabricksAPI
+from databricks.sdk import WorkspaceClient
 import shutil
 import base64
 from urllib.parse import quote, unquote
@@ -154,7 +155,6 @@ def is_notebook(o):
 
 
 def valid_file(o):
-    print("o:" + str(type(o)))
     if is_notebook(o):
         if re.compile("^\\d+").match(os.path.basename(o.path)):
             return True
@@ -210,23 +210,21 @@ class Accelerator:
         self.db_path = db_path
         self.db_name = db_name
         self.db = DatabricksAPI(host=db_host, token=db_token)
+        self.w = WorkspaceClient()
         self.logger = logging.getLogger('databricks')
 
     def export_to_html(self, local_dir):
 
         self.logger.info("Exporting solution accelerator to HTML file(s)")     
-        db_objects = list(self.db.workspace.list(self.db_path))
-        print("db_objects:" + "\n".join(list(self.db.workspace.list(self.db_path))))
+        db_objects = list(self.w.workspace.list(self.db_path))
         
         # Retrieve list of numbered notebooks. Those will be our core story telling assets
         db_notebooks = [[x.path for x in db_objects] for db_object in db_objects if valid_file(db_object)][0]
         
-        print("db_notebooks[0]:" + str(type(db_notebooks[0])))
         # Append list of numbered notebooks (story telling) with whatever additional util notebooks
         # Those would be added to the end of the index in alphabetical order
         for db_object in db_objects:
             db_path = db_object.path
-            print("db_object:" + str(type(db_object)))
             if is_notebook(db_object) and db_path not in db_notebooks:
                 db_notebooks.append(db_path)
 
