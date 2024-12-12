@@ -1,4 +1,5 @@
 from databricks_api import DatabricksAPI
+from databricks.sdk import WorkspaceClient
 import shutil
 import base64
 from urllib.parse import quote, unquote
@@ -150,12 +151,12 @@ def transform_html(org_html, notebook_encoded):
 
 
 def is_notebook(o):
-    return o['object_type'] == "NOTEBOOK"
+    return str(o.object_type) ==  'ObjectType.NOTEBOOK'
 
 
 def valid_file(o):
     if is_notebook(o):
-        if re.compile("^\\d+").match(os.path.basename(o['path'])):
+        if re.compile("^\\d+").match(os.path.basename(o.path)):
             return True
     return False
 
@@ -209,20 +210,21 @@ class Accelerator:
         self.db_path = db_path
         self.db_name = db_name
         self.db = DatabricksAPI(host=db_host, token=db_token)
+        self.w = WorkspaceClient(host=db_host, token=db_token)
         self.logger = logging.getLogger('databricks')
 
     def export_to_html(self, local_dir):
 
-        self.logger.info("Exporting solution accelerator to HTML file(s)")
-        db_objects = self.db.workspace.list(self.db_path)['objects']
-
+        self.logger.info("Exporting solution accelerator to HTML file(s)")     
+        db_objects = list(self.w.workspace.list(self.db_path))
+        
         # Retrieve list of numbered notebooks. Those will be our core story telling assets
-        db_notebooks = [db_object['path'] for db_object in db_objects if valid_file(db_object)]
-
+        db_notebooks = [db_object.path for db_object in db_objects if valid_file(db_object)]
+        
         # Append list of numbered notebooks (story telling) with whatever additional util notebooks
         # Those would be added to the end of the index in alphabetical order
         for db_object in db_objects:
-            db_path = db_object['path']
+            db_path = db_object.path
             if is_notebook(db_object) and db_path not in db_notebooks:
                 db_notebooks.append(db_path)
 
@@ -236,9 +238,9 @@ class Accelerator:
         self.logger.info("Importing solution [README.md] file")
         readme_file = False
         for db_object in db_objects:
-            if db_object['object_type'] == 'FILE' and db_object['path'].split('/')[-1] == 'README.md':
+            if db_object.object_type == 'FILE' and db_object.path.split('/')[-1] == 'README.md':
                 readme_file = True
-                readme_content = self.db.workspace.export_workspace(db_object['path'])
+                readme_content = self.db.workspace.export_workspace(db_object.path)
                 readme_notebook = create_readme_page(self.db_name, readme_content)
                 persist_readme_page(self.db_name, local_dir, readme_notebook)
                 landing_page = f'{self.db_name}.html'
